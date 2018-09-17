@@ -13,6 +13,7 @@ object MaxSpentByCustomer {
     val sc = new SparkContext("local[*]","MaxSpentByCustomer");
     val linesRDD = sc.textFile("resources/customer-orders.csv");
     val tempRDD = linesRDD.map(line => (line.toString().split(",")(0).toInt,line.toString().split(",")(2).toFloat));
+    //Reduce by key and reverse so that we can sort by key. Do we have a sort by value method? 
     val resultRDD = tempRDD.reduceByKey((x,y)=>x+y).map(x=>(x._2,x._1)).first();
 //    resultRDD.foreach(println(_))
     println(s"Customer: ${resultRDD._2} has the highest spending of ${resultRDD._1}");
