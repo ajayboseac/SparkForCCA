@@ -17,22 +17,21 @@ object ReadableMovieRatings {
   
   def main(args : Array[String]){
     Logger.getLogger("org").setLevel(Level.ERROR)
+    
+    
     implicit val codec = Codec("UTF-8")
+    // Handle input data varitions
     codec.onMalformedInput(CodingErrorAction.REPLACE)
     codec.onUnmappableCharacter(CodingErrorAction.REPLACE)
     val sc = new SparkContext("local[*]","ReadableMovieRatings");
     val lines = Source.fromFile("resources/u.item").getLines();
-//    lines.map()
-    
+   
     var nameDict : Map[Int,String] = Map();
     
     for(line <- lines ){
        nameDict+= (line.split("\\|")(0).toInt->line.split("\\|")(1))
     }
-    //Create the movie names map and broadcast it to create an RDD
-    //
-//    map.foreach(println(_))
-    
+
    val nameDictRdd = sc.broadcast(nameDict);
    val data= sc.textFile("resources/u.data")
    val sortedData = data.map(x=>(x.split("\t")(1).toInt,1)).reduceByKey((x,y)=>x+y).map(x=>(nameDictRdd.value(x._1),x._2)).map(x=>(x._2,x._1)).sortByKey(false).collect();
